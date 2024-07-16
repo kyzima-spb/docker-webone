@@ -1,4 +1,6 @@
-FROM mcr.microsoft.com/dotnet/sdk:6.0-alpine3.19 as build
+ARG DOTNET_SDK_VERSION="6.0"
+
+FROM mcr.microsoft.com/dotnet/sdk:${DOTNET_SDK_VERSION}-alpine3.19 AS build
 
 WORKDIR /usr/local/src/webone
 
@@ -15,15 +17,15 @@ FROM alpine:3.20
 
 EXPOSE 8080
 
-RUN adduser -s /usr/sbin/nologin -D webone \
-    && apk update && apk add --no-cache \
+RUN --mount=type=cache,target=/var/cache/apk,sharing=locked \
+    apk update && apk add \
         icu-libs \
         imagemagick \
         imagemagick-svg \
         imagemagick-pdf \
         ffmpeg \
         yt-dlp \
-    && rm -rf /var/cache/apk/* \
+    && adduser -s /usr/sbin/nologin -D webone \
     && ln -s /dev/null /var/log/webone.log
 
 USER webone
