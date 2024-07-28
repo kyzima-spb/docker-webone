@@ -4,16 +4,32 @@ on:
   push:
     branches:
       - master
+    paths:
+      - .github/workflows/publish-image.yml
+      - .github/matrix.json
+      - 'docker/**'
 
 env:
-  IMAGE_NAME: "webone"
+  IMAGE_NAME: 'webone'
 
 jobs:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.load.outputs.matrix }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Load JSON file
+        id: load
+        working-directory: ./.github
+        run: echo "matrix=$(cat matrix.json)" | tr -d '\n' >> $GITHUB_OUTPUT
+
   build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        version: ["0.17.0", "0.16.3"]
+        version: ${{ fromJSON(needs.setup.outputs.matrix) }}
     steps:
       -
         name: Checkout
@@ -28,7 +44,7 @@ jobs:
           tags: |
             ${{ matrix.version }}
           flavor: |
-            latest=${{ matrix.version == '0.17.0' }}
+            latest=${{ matrix.latest }}
       -
         name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
