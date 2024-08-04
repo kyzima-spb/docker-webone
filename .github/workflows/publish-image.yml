@@ -18,18 +18,20 @@ jobs:
     outputs:
       matrix: ${{ steps.load.outputs.matrix }}
     steps:
-      - name: Checkout
+      -
+        name: Checkout
         uses: actions/checkout@v4
-      - name: Load JSON file
+      -
+        name: Load JSON file
         id: load
         working-directory: ./.github
-        run: echo "matrix=$(cat matrix.json)" | tr -d '\n' >> $GITHUB_OUTPUT
+        run: echo "matrix=$(tr -d '\n' < matrix.json)" >> $GITHUB_OUTPUT
 
   build:
+    needs: setup
     runs-on: ubuntu-latest
     strategy:
-      matrix:
-        version: ${{ fromJSON(needs.setup.outputs.matrix) }}
+      matrix: ${{ fromJSON(needs.setup.outputs.matrix) }}
     steps:
       -
         name: Checkout
@@ -64,7 +66,8 @@ jobs:
           file: ./docker/Dockerfile
           build-args: |
             WEBONE_VERSION=${{ matrix.version }}
-          push: true
+            DOTNET_SDK_VERSION=${{ matrix.sdk_version }}
+          push: false
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/buildcache:${{ env.IMAGE_NAME }}-${{ env.IMAGE_VERSION }}
