@@ -6,7 +6,7 @@
   ],
   "sdk_version": [
     "6.0",
-    "7.0"
+    "8.0"
   ],
   "include": [
     {
@@ -15,7 +15,7 @@
     {
       "latest": true,
       "version": "0.17.1",
-      "sdk_version": "7.0"
+      "sdk_version": "8.0"
     }
   ]
 }

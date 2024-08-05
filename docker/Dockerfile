@@ -1,10 +1,11 @@
 ARG DOTNET_SDK_VERSION="8.0"
+ARG ALPINE_VERSION="3.20"
 
-FROM mcr.microsoft.com/dotnet/sdk:${DOTNET_SDK_VERSION}-alpine3.19 AS build
+FROM mcr.microsoft.com/dotnet/sdk:${DOTNET_SDK_VERSION}-alpine${ALPINE_VERSION} AS build
 
 WORKDIR /usr/local/src/webone
 
-ARG WEBONE_VERSION="0.17.0"
+ARG WEBONE_VERSION="0.17.1"
 ARG WEBONE_BASE_URL="https://github.com/atauenis/webone/archive/refs/tags"
 
 ADD ${WEBONE_BASE_URL}/v${WEBONE_VERSION}.tar.gz /tmp/webone.tar.gz

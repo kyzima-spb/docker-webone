@@ -12,7 +12,7 @@ env:
   IMAGE_NAME: "webone"
 
 jobs:
-  docker:
+  dockerhub-description:
     runs-on: ubuntu-latest
     steps:
       -
