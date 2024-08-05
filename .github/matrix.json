@@ -10,7 +10,12 @@
   ],
   "include": [
     {
-      "latest": false
+      "latest": false,
+      "latestSDK": false
+    },
+    {
+      "latestSDK": true,
+      "sdk_version": "8.0"
     },
     {
       "latest": true,

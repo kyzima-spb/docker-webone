@@ -44,7 +44,8 @@ jobs:
           images: |
             ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}
           tags: |
-            ${{ matrix.version }}
+            type=raw,${{ matrix.version }},enable=${{ matrix.latestSDK }}
+            ${{ matrix.version }}-dotnet-${{ matrix.sdk_version }}
           flavor: |
             latest=${{ matrix.latest }}
       -
@@ -67,7 +68,7 @@ jobs:
           build-args: |
             WEBONE_VERSION=${{ matrix.version }}
             DOTNET_SDK_VERSION=${{ matrix.sdk_version }}
-          push: false
+          push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/buildcache:${{ env.IMAGE_NAME }}-${{ env.IMAGE_VERSION }}
