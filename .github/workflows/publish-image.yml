@@ -4,14 +4,12 @@ on:
   push:
     branches:
       - master
+      - dev-master
     paths:
       - .github/workflows/publish-image.yml
       - .github/matrix.json
       - 'docker/**'
-
-env:
-  IMAGE_NAME: 'webone'
-  TEST_TAG: 'test'
+  pull_request:
 
 jobs:
   setup:
@@ -43,12 +41,21 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: |
-            ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}
+            ${{ vars.IMAGE_NAME }}
           tags: |
             type=raw,${{ matrix.version }},enable=${{ matrix.latestSDK }}
             ${{ matrix.version }}-dotnet-${{ matrix.sdk_version }}
           flavor: |
             latest=${{ matrix.latest }}
+      -
+        name: Setting environment variables
+        run: |
+          image="${{ vars.IMAGE_NAME }}"
+          version="${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}"
+          cat << EOF >> $GITHUB_ENV
+          CACHE_IMAGE=$image:buildcache-$version
+          TEST_IMAGE=$image:test-$version
+          EOF
       -
         name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -61,30 +68,33 @@ jobs:
           build-args: |
             WEBONE_VERSION=${{ matrix.version }}
             DOTNET_SDK_VERSION=${{ matrix.sdk_version }}
+          tags: ${{ env.TEST_IMAGE }}
+          cache-from: type=registry,ref=${{ env.CACHE_IMAGE }}
           load: true
-          tags: ${{ env.IMAGE_NAME }}:${{ env.TEST_TAG }}
       -
-        name: Test
-        run: bash tests/test_proxy.sh ${{ env.IMAGE_NAME }}:${{ env.TEST_TAG }}
+        name: Executing tests
+        working-directory: ./tests
+        run: |
+          bash test_proxy.sh -v ./custom.conf:/opt/webone/webone.conf.d/100_custom.conf ${{ env.TEST_IMAGE }}
+          bash test_proxy.sh -v ./custom.conf:/opt/webone/webone.conf.d/100_custom.conf -u 1001:1001 ${{ env.TEST_IMAGE }}
       -
         name: Login to Docker Hub
+        if: ${{ github.event_name == 'push' &&  github.ref_name == 'master' }}
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
       -
         name: Build and push
+        if: ${{ github.event_name == 'push' &&  github.ref_name == 'master' }}
         uses: docker/build-push-action@v6
-        env:
-          IMAGE_VERSION: ${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
         with:
           context: ./docker/root
           file: ./docker/Dockerfile
           build-args: |
             WEBONE_VERSION=${{ matrix.version }}
             DOTNET_SDK_VERSION=${{ matrix.sdk_version }}
-          push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/buildcache:${{ env.IMAGE_NAME }}-${{ env.IMAGE_VERSION }}
-          cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/buildcache:${{ env.IMAGE_NAME }}-${{ env.IMAGE_VERSION }},mode=max
+          cache-to: type=registry,ref=${{ env.CACHE_IMAGE }},mode=max
+          push: true

@@ -1,6 +1,5 @@
 #!/usr/bin/env sh
 
-
 cmd="${1}"
 weboneInstallPath="$(dirname "$(readlink -f "$(which webone)")")"
 weboneUserConfigDir="$HOME/.config/webone"

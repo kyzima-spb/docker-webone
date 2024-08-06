@@ -14,14 +14,13 @@ log() {
 
 
 runContainer() {
-    local imageName="${1:-webone}"
-    local maxWait=${2:-60}
-    local waitInterval=${3:-5}
+    local maxWait=${MAX_WAIT:-60}
+    local waitInterval=${WAIT_INTERVAL:-5}
     local containerId
     local elapsedTime=0
 
-    log 'Start container: '
-    containerId=$(docker run --rm -d -p '8080:8080' "$imageName") || exit 1
+    log "Start container with arguments $*: "
+    containerId=$(docker run --rm -d -p '8080:8080' "$@") || exit 1
     echo_error 'OK\n'
 
     log 'Container health: '
@@ -37,7 +36,7 @@ runContainer() {
                 sleep "$waitInterval"
                 elapsedTime=$((elapsedTime + waitInterval))
                 ;;
-        esac|| exit 1
+        esac || exit 1
     done
 
     echo_error 'FAIL\n'
@@ -46,7 +45,7 @@ runContainer() {
 }
 
 
-testProxy() {
+testResponseCode() {
     local url="$1"
     local expected=${2:-200}
     local result
@@ -54,18 +53,37 @@ testProxy() {
     result=$(curl -x http://127.0.0.1:8080 -L -o /dev/null -s -w '%{http_code}' "$url" || exit 0)
 
     if [[ "$result" == "$expected" ]]; then
-        log "test_proxy[$url]: OK\n"
+        log "test_response_code[$url]: OK\n"
     else
-        log "test_proxy[$url]: FAIL ($expected, got $result)\n"
+        log "test_response_code[$url]: FAIL ($expected, got $result)\n"
         exit 1
     fi
 }
 
 
-containerId="$(runContainer "$1")"
+testResponse() {
+    local url="$1"
+    local expected="$2"
+    local result
+
+    result=$(curl -x http://127.0.0.1:8080 -L -s "$url" | grep -o "$expected" || exit 0)
+
+    if [[ -z "$result" ]]; then
+        log "test_response[$url]: FAIL ($result not match pattern $expected)\n"
+        exit 1
+    else
+        log "test_response[$url]: OK\n"
+    fi
+}
+
+
+containerId="$(runContainer "$@")"
 trap 'docker stop "$containerId" > /dev/null' EXIT
 
-testProxy http://google.com
-testProxy http://narod.ru
-testProxy http://google.com/404 404
-testProxy http://api.github.com/user 401
+testResponseCode 'http://google.com'
+testResponseCode 'http://api.github.com/user' 401
+
+testResponse 'http://narod.ru' 'http://web.archive.org'
+testResponse 'http://glukoza.ru' 'http://web.archive.org'
+testResponse 'http://nnz-home.ru' 'NNZ-Home'
+testResponse 'http://127.0.0.1:8080' 'Internal URLs'
