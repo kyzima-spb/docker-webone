@@ -1,4 +1,4 @@
-name: Build and publish images
+name: Build, test and publish image
 
 on:
   push:
@@ -10,6 +10,9 @@ on:
       - .github/matrix.json
       - 'docker/**'
   pull_request:
+    paths:
+      - .github/matrix.json
+      - 'docker/**'
 
 jobs:
   setup:
