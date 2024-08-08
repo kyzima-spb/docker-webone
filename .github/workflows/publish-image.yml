@@ -13,6 +13,7 @@ on:
       - 'docker/**'                          # или любых файлов в директории docker
   pull_request:                              # Задача запускается при создании pull request
     paths:
+      - .github/workflows/publish-image.yml  # Задача запускается при изменении текущего workflow,
       - .github/matrix.json                  # если внесли изменения в файл матрицы
       - 'docker/**'                          # или любые файлы в директории docker
 
@@ -56,14 +57,11 @@ jobs:
           flavor: |                             # Цитата: "определяет глобальное поведение для tags", можно указать признак latest, суффикс и префикс
             latest=${{ matrix.latest }}
       -
-        name: Setting environment variables     # Установка переменных окружения, значения которых зависят от метаданных
-        run: |                                  # Создаем две переменные CACHE_IMAGE и TEST_IMAGE с именами образа для кеша и тестового образа
-          image="${{ vars.IMAGE_NAME }}"
-          version="${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}"
-          cat << EOF >> $GITHUB_ENV
-          CACHE_IMAGE=$image:buildcache-$version
-          TEST_IMAGE=$image:test-$version
-          EOF
+        name: Set CACHE_IMAGE environment variable              # Установка переменной окружения с именами образа для кеша
+        run: echo "CACHE_IMAGE=${{ vars.IMAGE_NAME }}:buildcache-${{ steps.meta.outputs.version }}" >> $GITHUB_ENV
+      -
+        name: Set TEST_IMAGE environment variable               # Установка переменной окружения с именами тестового образа
+        run: echo "TEST_IMAGE=${{ vars.IMAGE_NAME }}:test-${{ steps.meta.outputs.version }}" >> $GITHUB_ENV
       -
         name: Set up Docker Buildx                              # Настройка Docker Buildx для сборки мультиплатформенных образов
         uses: docker/setup-buildx-action@v3                     # с помощью GitHub Action от авторов Docker
@@ -104,5 +102,6 @@ jobs:
             DOTNET_VERSION=${{ matrix.dotnet_version }}
           tags: ${{ steps.meta.outputs.tags }}                         # - теги: все присвоенные на шаге meta
           labels: ${{ steps.meta.outputs.labels }}                     # - другие метаданные образа для инструкции LABEL
+          annotations: ${{ steps.meta.outputs.annotations }}           # - аннотации
           cache-to: type=registry,ref=${{ env.CACHE_IMAGE }},mode=max  # - экспортировать кеш в специальный образ в реестре со всеми промежуточными слоями
           push: true                                                   # - опубликовать образ в реестре
