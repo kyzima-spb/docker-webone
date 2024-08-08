@@ -79,7 +79,7 @@ jobs:
           load: true                                            # - экспорт одноплатформенного образа в виде архива на клиент
       -
         name: Executing tests                                   # Тестируем собранный образ
-        working-directory: ./tests                              # Указываем текущую рабочую директория как tests
+        working-directory: ./docker/tests                       # Указываем текущую рабочую директория как docker/tests
         run: |                                                  # Запускаем тесты с пользовательской конфигурацией и от случайного пользователя
           bash test_proxy.sh -v ./custom.conf:/opt/webone/webone.conf.d/100_custom.conf ${{ env.TEST_IMAGE }}
           bash test_proxy.sh -v ./custom.conf:/opt/webone/webone.conf.d/100_custom.conf -u 1001:1001 ${{ env.TEST_IMAGE }}
