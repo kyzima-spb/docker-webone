@@ -1,7 +1,7 @@
-ARG DOTNET_SDK_VERSION="8.0"
+ARG DOTNET_VERSION="8.0"
 ARG ALPINE_VERSION="3.20"
 
-FROM mcr.microsoft.com/dotnet/sdk:${DOTNET_SDK_VERSION}-alpine${ALPINE_VERSION} AS build
+FROM mcr.microsoft.com/dotnet/sdk:${DOTNET_VERSION}-alpine${ALPINE_VERSION} AS build
 
 WORKDIR /usr/local/src/webone
 

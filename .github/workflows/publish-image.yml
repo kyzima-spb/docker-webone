@@ -44,14 +44,15 @@ jobs:
         uses: actions/checkout@v4               # с помощью официального Github Action
       -
         name: Docker meta                       # Назначаем метаданные Docker образу
-        id: meta                                # Уникальный идентификатор для ссылки на шаг в контекстах
         uses: docker/metadata-action@v5         # с помощью GitHub Action от авторов Docker
+        id: meta                                # Уникальный идентификатор для ссылки на шаг в контекстах
         with:                                   # Указываем параметры действия
           images: |                             # Список Docker образов для использования в качестве базового имени для tags
             ${{ vars.IMAGE_NAME }}
           tags: |                               # Список тегов, которые будут добавлены Docker образам из images
-            type=raw,${{ matrix.version }},enable=${{ matrix.latestSDK }}
-            ${{ matrix.version }}-dotnet-${{ matrix.sdk_version }}
+            type=raw,${{ matrix.version }},enable=${{ matrix.latest_dotnet }}
+            type=raw,dotnet${{ matrix.dotnet_version }},enabled$={{ matrix.latest }}
+            ${{ matrix.version }}-dotnet${{ matrix.dotnet_version }}
           flavor: |                             # Цитата: "определяет глобальное поведение для tags", можно указать признак latest, суффикс и префикс
             latest=${{ matrix.latest }}
       -
@@ -67,14 +68,14 @@ jobs:
         name: Set up Docker Buildx                              # Настройка Docker Buildx для сборки мультиплатформенных образов
         uses: docker/setup-buildx-action@v3                     # с помощью GitHub Action от авторов Docker
       -
-        name: Build and export to Docker                        # Сборка и экспорт тестового Docker образа на клиент
+        name: Build test image and export to Docker             # Сборка и экспорт тестового Docker образа на клиент
         uses: docker/build-push-action@v6                       # с помощью GitHub Action от авторов Docker
         with:                                                   # Указываем параметры действия:
           context: ./docker/root                                # - контекст сборки
           file: ./docker/Dockerfile                             # - путь к Dockerfile, т.к. он вне контекста сборки
           build-args: |                                         # - значения для переменных времени сборки
             WEBONE_VERSION=${{ matrix.version }}
-            DOTNET_SDK_VERSION=${{ matrix.sdk_version }}
+            DOTNET_VERSION=${{ matrix.dotnet_version }}
           tags: ${{ env.TEST_IMAGE }}                           # - только один тег: имя тестового образа
           cache-from: type=registry,ref=${{ env.CACHE_IMAGE }}  # - импортировать кэш из специального образа в реестре
           load: true                                            # - экспорт одноплатформенного образа в виде архива на клиент
@@ -100,8 +101,8 @@ jobs:
           file: ./docker/Dockerfile                                    # - путь к Dockerfile, т.к. он вне контекста сборки
           build-args: |                                                # - значения для переменных времени сборки
             WEBONE_VERSION=${{ matrix.version }}
-            DOTNET_SDK_VERSION=${{ matrix.sdk_version }}
+            DOTNET_VERSION=${{ matrix.dotnet_version }}
           tags: ${{ steps.meta.outputs.tags }}                         # - теги: все присвоенные на шаге meta
           labels: ${{ steps.meta.outputs.labels }}                     # - другие метаданные образа для инструкции LABEL
-          cache-to: type=registry,ref=${{ env.CACHE_IMAGE }},mode=max  # - опубликовать кеш образа в реестре со всеми промежуточными слоями
+          cache-to: type=registry,ref=${{ env.CACHE_IMAGE }},mode=max  # - экспортировать кеш в специальный образ в реестре со всеми промежуточными слоями
           push: true                                                   # - опубликовать образ в реестре

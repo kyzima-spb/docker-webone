@@ -8,7 +8,7 @@ HTTP 1.x proxy that makes old web browsers usable again in the Web 2.0 world by 
   - [How to limit resource usage?](#how-to-limit-resource-usage)
 - [How to create a custom image?](#how-to-create-a-custom-image)
   - [How to change WebOne version?](#how-to-change-webone-version)
-  - [How to change .NET SDK version?](#how-to-change-net-sdk-version)
+  - [How to change .NET version?](#how-to-change-net-version)
 
 ## How to start a container?
 
@@ -95,16 +95,16 @@ docker build \
     ./docker/root
 ```
 
-### How to change .NET SDK version?
+### How to change .NET version?
 
-The `DOTNET_SDK_VERSION` build argument allows you to specify the version of .NET SDK.
-The value is part of the `${DOTNET_SDK_VERSION}-alpine${ALPINE_VERSION}` tag.
+The `DOTNET_VERSION` build argument allows you to specify the version of .NET SDK.
+The value is part of the `${DOTNET_VERSION}-alpine${ALPINE_VERSION}` tag.
 Available tags can be viewed on the [official Microsoft website](https://mcr.microsoft.com/product/dotnet/sdk/tags):
 
 ```shell
 git clone https://github.com/kyzima-spb/webone.git
 docker build \
-    --build-arg DOTNET_SDK_VERSION=7.0 \
+    --build-arg DOTNET_VERSION=7.0 \
     -t webone \
     -f ./docker/Dockerfile \
     ./docker/root
