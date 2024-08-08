@@ -5,24 +5,24 @@ name: Update Docker Hub Description
 on:
   push:
     branches:
-      - master  # Задача запускается при пуше в ветку master
+      - master                                       # Задача запускается при пуше в ветку master
     paths:
-      - README.md  # Задача запускается при изменении файла README.md
-      - .github/workflows/dockerhub-description.yml  # Задача запускается при изменении этого файла с workflow
+      - .github/workflows/dockerhub-description.yml  # Задача запускается при изменении текущего workflow
+      - README.md                                    # или файла README.md
 
+# Определение работ
 jobs:
-  # Определение работы (job) для обновления описания Docker Hub
-  dockerhub-description:
-    runs-on: ubuntu-latest  # Работа выполняется на последней версии Ubuntu
-    steps:
+  dockerhub-description:                                    # Определение работы для обновления описания Docker Hub
+    runs-on: ubuntu-latest                                  # Работа выполняется на последней версии Ubuntu
+    steps:                                                  # Определение последовательности шагов (задач), из которых состоит работа
+      -                                                     # Имя шага, может быть любым
+        name: Checkout                                      # Клонируем текущий репозиторий
+        uses: actions/checkout@v4                           # с помощью официального Github Action
       -
-        name: Checkout  # Шаг для клонирования репозитория
-        uses: actions/checkout@v4  # Используем GitHub Action для клонирования репозитория
-      -
-        name: Docker Hub Description  # Шаг для обновления описания на Docker Hub
-        uses: peter-evans/dockerhub-description@v4  # Используем сторонний GitHub Action для обновления описания на Docker Hub
-        with:
-          username: ${{ secrets.DOCKER_HUB_USERNAME }}  # Имя пользователя Docker Hub, хранится в секрете
+        name: Docker Hub Description                        # Обновление описания на Docker Hub (файл README.md по умолчанию)
+        uses: peter-evans/dockerhub-description@v4          # с помощью GitHub Action от участников сообщества Docker
+        with:                                               # Указываем параметры действия: обязательные и нет
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}      # Имя пользователя Docker Hub, хранится в секрете
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}  # Токен доступа Docker Hub, хранится в секрете
-          repository: ${{ vars.IMAGE_NAME }}  # Имя репозитория на Docker Hub, хранится в переменной окружения
-          short-description: ${{ github.event.repository.description }}  # Краткое описание, взято из описания репозитория на GitHub
+          repository: ${{ vars.IMAGE_NAME }}                # Имя репозитория на Docker Hub, хранится в переменной окружения
+          short-description: ${{ github.event.repository.description }}  # Краткое описание из репозитория на GitHub
