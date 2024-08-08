@@ -52,10 +52,10 @@ jobs:
             ${{ vars.IMAGE_NAME }}
           tags: |                               # Список тегов, которые будут добавлены Docker образам из images
             type=raw,${{ matrix.version }},enable=${{ matrix.latest_dotnet }}
-            type=raw,dotnet${{ matrix.dotnet_version }},enabled=${{ matrix.latest }}
+            type=raw,dotnet${{ matrix.dotnet_version }},enable=${{ matrix.latest }}
             ${{ matrix.version }}-dotnet${{ matrix.dotnet_version }}
           flavor: |                             # Цитата: "определяет глобальное поведение для tags", можно указать признак latest, суффикс и префикс
-            latest=${{ matrix.latest }}
+            latest=${{ matrix.latest && matrix.latest_dotnet }}
       -
         name: Set CACHE_IMAGE environment variable              # Установка переменной окружения с именами образа для кеша
         run: echo "CACHE_IMAGE=${{ vars.IMAGE_NAME }}:buildcache-${{ steps.meta.outputs.version }}" >> $GITHUB_ENV

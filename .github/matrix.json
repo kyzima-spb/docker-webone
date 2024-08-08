@@ -14,12 +14,11 @@
       "latest_dotnet": false
     },
     {
-      "latest_dotnet": true,
-      "dotnet_version": "8.0"
+      "latest": true,
+      "version": "0.17.1"
     },
     {
-      "latest": true,
-      "version": "0.17.1",
+      "latest_dotnet": true,
       "dotnet_version": "8.0"
     }
   ]
