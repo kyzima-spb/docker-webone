@@ -1,0 +1,29 @@
+name: Check the new version of Tixati and upgrade
+
+on:
+  schedule:
+    - cron: '45 6 * * *'
+  push:
+    branches:
+      - dev-master
+    paths:
+      - .github/workflows/check-and-upgrade.yml
+
+jobs:
+  run:
+    uses: kyzima-spb/gh-actions/.github/workflows/bump-version.yml@master
+    secrets:
+      github-token: ${{ secrets.GITHUB_TOKEN }}
+    with:
+      commit-message: "Bump WebOne from {current} to {latest}"
+      get-current-release-command: |
+        jq -r '.include[] | select(.latest == true) | .version' .github/matrix.json
+      lookup: atauenis/webone
+      patch-files-command: |
+        perl -i -pe 's|(?<=WEBONE_VERSION=")[^"]+|'${LATEST_VERSION}'|' docker/Dockerfile
+        pushd .github
+          jq --arg version "$LATEST_VERSION" '
+            .version += [$version]
+            | (.include[] | select(.latest == true) | .version) = $version
+          ' matrix.json | tee matrix.tmp.json && mv matrix.tmp.json matrix.json
+        popd
