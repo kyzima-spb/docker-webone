@@ -1,5 +1,7 @@
 # WebOne HTTP 1.x proxy in container
 
+[![WebOne: Выходим в интернет в 2024 году через IE6 и Firefox 3](https://raw.githubusercontent.com/kyzima-spb/docker-webone/dev-master/yt-preview.png)](https://youtu.be/Rflb7_M7QSU "WebOne: Выходим в интернет в 2024 году через IE6 и Firefox 3")
+
 Container with [WebOne](https://github.com/atauenis/webone) -
 HTTP 1.x proxy that makes old web browsers usable again in the Web 2.0 world by [Alexander Tauenis](https://github.com/atauenis).
 
