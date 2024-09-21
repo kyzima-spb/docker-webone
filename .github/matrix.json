@@ -2,7 +2,8 @@
   "version": [
     "0.16.3",
     "0.17.0",
-    "0.17.1"
+    "0.17.1",
+    "0.17.2"
   ],
   "dotnet_version": [
     "6.0",
@@ -15,7 +16,7 @@
     },
     {
       "latest": true,
-      "version": "0.17.1"
+      "version": "0.17.2"
     },
     {
       "latest_dotnet": true,
